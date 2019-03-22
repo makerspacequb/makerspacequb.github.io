@@ -1,5 +1,7 @@
 define(function(){
 
+    var answerCell = 0;
+
     /**
     * This method is called when marker is executed through the shortcut or the button (Run Marker)
     * It runs the modified code in the kernel and calls the methods to process the commands and show next question (if correct)
@@ -94,16 +96,14 @@ define(function(){
         //initial = show
         //none = hide
         if(cell.get_text().toLowerCase().includes("show answers")){
-            document.getElementsByClassName("input")[0].style.display = 'initial';
-            document.getElementsByClassName("output")[0].style.display = 'initial';
+            cells[answerCell].style.display = 'initial';
         }
         else if(cell.get_text().toLowerCase().includes("hide answers")){
-            document.getElementsByClassName("input")[0].style.display = 'none';
-            document.getElementsByClassName("output")[0].style.display = 'none';
+            cells[answerCell].style.display = 'none';
         }
         else if(cell.get_text().toLowerCase().includes("show all")){
             for(i = 1; i < cells.length; i++){
-                cells[i].style.display = 'initial';
+                cells[answerCell+1].style.display = 'initial';
             }
         }
     }
@@ -118,7 +118,7 @@ define(function(){
     */
     var modifyCode = function(cell, questionNum){
         //fetching code after #Mark in first notebook cell
-        var marker = Jupyter.notebook.get_cell(0).get_text().split('#Mark')[1];
+        var marker = Jupyter.notebook.get_cell(answerCell).get_text().split('#Mark')[1];
         //taking all current cell lines
         lines = cell.get_text().split('\n');
         cellCode = "";
@@ -194,6 +194,8 @@ define(function(){
     var load_next_question= function (cells, index, questionNum) {
         //setting file for recording correct question numbers
         var file = "correct.txt";
+        //Sleep is needed as sometimes this method was called before python finished writing to text file
+        sleep(500);
         correct = readTextFile(file);
         //text file only number of currently completing questions
         if(parseInt(correct) == parseInt(questionNum)){
@@ -225,23 +227,25 @@ define(function(){
         }
     }
 
+    /**
+    * This is a basic sleep method for javascript
+    */
+    function sleep(ms) {
+        var unixtime_ms = new Date().getTime();
+        while(new Date().getTime() < unixtime_ms + ms) {}
+    }
+
   return {
     /**
     * This method is run when the extension is being loaded
     */
     load_ipython_extension: function(){
         //checks the first cell contains #marker if not extension is not loaded
-        if(Jupyter.notebook.get_cell(0).get_text().split("\n")[0]=="#marker"){
-
-            //hiding first cell containing set up and marking code
-            //input cell part
-            document.getElementsByClassName("input")[0].style.display = 'none';
-            //output cell part
-            document.getElementsByClassName("output")[0].style.display = 'none';
+        if(Jupyter.notebook.get_cell(answerCell).get_text().split("\n")[0]=="#marker"){
 
             //Hides all cells after the one they are currently on
             var cells = document.getElementsByClassName("cell");
-            for(i = 1; i < cells.length;i++){
+            for(i = 0; i < cells.length;i++){
                 //hides every cell
                 cells[i].style.display = 'none';
             }
