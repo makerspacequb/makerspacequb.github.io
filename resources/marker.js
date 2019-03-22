@@ -138,7 +138,7 @@ define(function(){
 
         //building the python code to be executed for marking
         //fetching imports (traceback from IPython)
-        code += "import traceback\nfrom IPython.display import Markdown, display\n"
+        code = "import traceback\nfrom IPython.display import Markdown, display\n"
 
         //try to open text file and also set console out to text file and console (Tee method)
         code += "try:\n\tf = open('"+ outputFile +"', 'w')\n\toriginal = sys.stdout\n\tsys.stdout = Tee(sys.stdout, f)\n"
