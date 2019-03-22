@@ -137,7 +137,7 @@ define(function(){
         outputFile = "out.txt"
 
         //building the python code to be executed for marking
-        //fetching imports (traceback from IPython)
+        //fetching imports (traceback from IPython) with markdown
         code = "import traceback\nfrom IPython.display import Markdown, display\n"
 
         //try to open text file and also set console out to text file and console (Tee method)
