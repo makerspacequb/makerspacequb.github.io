@@ -55,4 +55,4 @@ def checkQuestion(number, code, vars):
         if vars.get('x') == 10 and outputMatches("10"):
             return True
         else:
-            return convertCodeToString(code)
+            return "Did you set x to 5 and double it with x = x*2? Also make sure you print"
