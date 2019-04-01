@@ -106,13 +106,13 @@ def checkQuestion(number, code, vars):
         else:
             return "Is donaldIsACat false and donaldIsADuck true?"
     elif(number == 12):
-        if isinstance(vars.get('y'),bool) and isinstance(vars.get('z'), bool) and vars.get('y') and not vars.get('z') and outputMatches("TrueFalse"):
+        if isinstance(vars.get('y'),bool) and isinstance(vars.get('z'), bool) and vars.get('y') and not vars.get('z') and outputMatches("True") and outputMatches("False"):
             return True
         elif not isinstance(vars.get('y'),bool) or not isinstance(vars.get('z'), bool):
             return "Did you create y and z with comparisons?"
         elif not vars.get('y') or vars.get('z'):
             return "Did you create variable y and z?"
-        elif not outputMatches("TrueFalse"):
+        elif not outputMatches("True") or not outputMatches("False"):
             return "Did you print y and z?"+debugOutput()
     elif(number == 13):
         if isinstance(vars.get('sayHello'), bool) and vars.get('sayHello') and "if sayHello:".strip() in code and outputMatches("Hello"):
