@@ -10,6 +10,13 @@ def outputMatches(pattern):
             return True
     return False
 
+def debugOutput():
+    file = open("out.txt", "r") 
+    text = ""
+    for line in file:
+        text += line.strip() +"|"
+    return text
+
 def convertCodeToString(code):
     output = code
     forReplacment = {"%20" : " ", "%23" : "#", "%26" : "&", "%2C" : ","}
@@ -105,7 +112,7 @@ def checkQuestion(number, code, vars):
         elif not vars.get('y') or vars.get('z'):
             return "Did you create variable y and z?"
         elif not outputMatches("TrueFalse"):
-            return "Did you print y and z?"
+            return "Did you print y and z?"+debugOutput()
     elif(number == 13):
         if isinstance(vars.get('sayHello'), bool) and vars.get('sayHello') and "if sayHello:".strip() in code and outputMatches("Hello"):
             return True
