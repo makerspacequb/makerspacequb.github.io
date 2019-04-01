@@ -1,5 +1,4 @@
 //01/04/19
-
 define(function(){
 
     var answerCell = 1;
@@ -65,10 +64,10 @@ define(function(){
         //Finds Question number by looking at cells above until it finds "Task " then a number extracting the number
         var questionNum = 0;
         for(i = index; i > 0; i--){
-            if(cells[i].getElementsByTagName("h2").length > 0){
+            if(cells[i].getElementsByClassName("question").length > 0){
                 //todo add validation that it is task-
                 //find first H2 tag above cell and extract its question number
-                questionNum = cells[i].getElementsByTagName("h2")[0].id.substring(5);
+                questionNum = cells[i].getElementsByClassName("question")[0].id;
                 break;
             }
         }
@@ -196,8 +195,8 @@ define(function(){
     * @param {number} questionNum - The question number they are currently on
     */
     var load_next_question= function (cells, index, questionNum) {
-        //Sleep was needed as sometimes when this method was called before python finished writing to text file
-        //sleep(500);
+        //Sleep is needed as sometimes when this method was called before python finished writing to text file
+        sleep(500);
         correct = readTextFile(correctFile);
         //text file only number of currently completing questions
         if(parseInt(correct) == parseInt(questionNum)){
@@ -206,7 +205,7 @@ define(function(){
             nextQuestion = parseInt(questionNum) +2;
             for(i = index; i < cells.length;i++){
                 //finding cell of matching question id
-                if(cells[i].getElementsByTagName("h2").length > 0 && cells[i].getElementsByTagName("h2")[0].id == "Task-"+nextQuestion)
+                if(cells[i].getElementsByClassName("question").length > 0 && cells[i].getElementsByClassName("question")[0].id == nextQuestion)
                     //when found breaks to stop loading more cells
                     break;
                 //for each cell set to show (initial = visible)
@@ -264,11 +263,6 @@ define(function(){
                 cells[i].style.display = 'none';
             }
 
-            for(i = 0; i < answerCell; i++){
-                //shows cells before answer cell
-                cells[i].style.display = 'initial';
-            }
-
             //gets all text cells
             var textCells = document.getElementsByClassName("text_cell");
             var textCell;
@@ -284,7 +278,7 @@ define(function(){
             }
             for(i = 0; i < textCells.length; i++){
                 //finding cell of matching question id
-                if(textCells[i].getElementsByTagName("h2").length > 0 && textCells[i].getElementsByTagName("h2")[0].id == "Task-"+tillQuestion){
+                if(textCells[i].getElementsByClassName("question").length > 0 && textCells[i].getElementsByClassName("question")[0].id == tillQuestion){
                     //sets current text to cell at index
                     textCell = textCells[i];
                     break;
