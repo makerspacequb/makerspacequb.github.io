@@ -1,6 +1,10 @@
 define(function(){
 
-    var answerCell = 0;
+    var answerCell = 1;
+
+    
+    //setting file for recording correct question numbers
+    var correctFile;
 
     /**
     * This method is called when marker is executed through the shortcut or the button (Run Marker)
@@ -76,12 +80,12 @@ define(function(){
         //This where the code is executed in kernel
         cell.last_msg_id = cell.kernel.execute(code, callbacks, {silent: false, store_history: true, stop_on_error : stop_on_error});
 
-        //display next question if correct
-        load_next_question(cells,index, questionNum);
-
         //TODO; make additonal notes
         cell.render();
         cell.events.trigger('execute.CodeCell', {cell: cell});
+
+        //display next question if correct
+        load_next_question(cells,index, questionNum);
     };
 
     /**
@@ -102,8 +106,8 @@ define(function(){
             cells[answerCell].style.display = 'none';
         }
         else if(cell.get_text().toLowerCase().includes("show all")){
-            for(i = 1; i < cells.length; i++){
-                cells[answerCell+1].style.display = 'initial';
+            for(i = answerCell+1; i < cells.length; i++){
+                cells[i].style.display = 'initial';
             }
         }
     }
@@ -128,10 +132,8 @@ define(function(){
             cellCode += "\t"+lines[j]+"\n";
         }
 
-        //set code to 'pass' if empty
-        if(cellCode == ""){
-            cellCode = "\tpass\n";
-        }
+        //add pass in case code is just a comment or blank
+        cellCode += "\tpass\n"
 
         //name of output file
         outputFile = "out.txt"
@@ -192,11 +194,9 @@ define(function(){
     * @param {number} questionNum - The question number they are currently on
     */
     var load_next_question= function (cells, index, questionNum) {
-        //setting file for recording correct question numbers
-        var file = "correct.txt";
-        //Sleep is needed as sometimes this method was called before python finished writing to text file
-        sleep(500);
-        correct = readTextFile(file);
+        //Sleep was needed as sometimes when this method was called before python finished writing to text file
+        //sleep(500);
+        correct = readTextFile(correctFile);
         //text file only number of currently completing questions
         if(parseInt(correct) == parseInt(questionNum)){
             //sets evreythign to be shown up to but not including 2 questions ahead
@@ -240,21 +240,38 @@ define(function(){
     * This method is run when the extension is being loaded
     */
     load_ipython_extension: function(){
-        //checks the first cell contains #marker if not extension is not loaded
+        //checks if the answer cell contains #marker if not extension is not loaded
         if(Jupyter.notebook.get_cell(answerCell).get_text().split("\n")[0]=="#marker"){
 
-            //Hides all cells after the one they are currently on
+            //this checks to see if the answer cell contains a correct text file address if not it just uses correct.txt
+            if(Jupyter.notebook.get_cell(answerCell).get_text().split("\n")[1].includes("correctFile = ")){
+                correctFile = Jupyter.notebook.get_cell(answerCell).get_text().split("\n")[1].split("correctFile = ")[1];
+                correctFile = correctFile.replace(/'|"/g," ");
+                correctFile = correctFile.trim();
+            }
+            else{
+                correctFile = "correct.txt";
+            }
+            //debug log
+            console.log(correctFile);
+
+            //get all cells from document
             var cells = document.getElementsByClassName("cell");
             for(i = 0; i < cells.length;i++){
                 //hides every cell
                 cells[i].style.display = 'none';
             }
 
+            for(i = 0; i < answerCell; i++){
+                //shows cells before answer cell
+                cells[i].style.display = 'initial';
+            }
+
             //gets all text cells
             var textCells = document.getElementsByClassName("text_cell");
             var textCell;
             //integer value found in correct.txt to set number of cells visible
-            var tillQuestion = parseInt(readTextFile("correct.txt"));
+            var tillQuestion = parseInt(readTextFile(correctFile));
             if(!Number.isInteger(tillQuestion) || tillQuestion < 1){
                 //invalid or no questions have been done
                 tillQuestion = 2;
@@ -263,7 +280,7 @@ define(function(){
                 //sets questions to show to loaded value from text file += 2
                 tillQuestion += 2;
             }
-            for(i = 0; i <textCells.length; i++){
+            for(i = 0; i < textCells.length; i++){
                 //finding cell of matching question id
                 if(textCells[i].getElementsByTagName("h2").length > 0 && textCells[i].getElementsByTagName("h2")[0].id == "Task-"+tillQuestion){
                     //sets current text to cell at index
@@ -271,7 +288,7 @@ define(function(){
                     break;
                 }
             }
-            i = 1;
+            i = answerCell+1;
             while(textCell != cells[i]){
                 //goes through all cells up until current and sets visible
                 cells[i].style.display = 'initial';
