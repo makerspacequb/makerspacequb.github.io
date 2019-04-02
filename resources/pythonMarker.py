@@ -1,4 +1,3 @@
-#01/04/19
 import urllib
 from pathlib import Path
 import sys
@@ -18,14 +17,21 @@ def debugOutput():
         text += line.strip() +"|"
     return text
 
+def outputEmpty():
+    file = open("out.txt", "r") 
+    for line in file:
+        if(len(line)) > 0:
+            return False
+    return True
+
 def convertCodeToString(code):
     output = code
-    forReplacment = {"%20" : " ", "%23" : "#", "%26" : "&", "%2C" : ","}
+    forReplacment = {"%20" : " ", "%23" : "#", "%26" : "&", "%2C" : ",", "%3D" : "=",
+                    "%0A": "\n", "%3A": ":", "%28": "(", "%29": ")", "%22" : "\"", "%3E": ">"} 
     for key in forReplacment.keys():
         replacement = forReplacment.get(key)
         while key in output:
             output = output.replace(key, replacement)
-    output = output.replace(" ","")
     return output.strip()
 
 def checkQuestion(number, code, vars):
@@ -113,7 +119,7 @@ def checkQuestion(number, code, vars):
         elif not vars.get('y') or vars.get('z'):
             return "Did you create variable y and z?"
         elif not outputMatches("True") or not outputMatches("False"):
-            return "Did you print y and z?"+debugOutput()
+            return "Did you print y and z?"
     elif(number == 13):
         if isinstance(vars.get('sayHello'), bool) and vars.get('sayHello') and "if sayHello:".strip() in code and outputMatches("Hello"):
             return True
@@ -126,7 +132,7 @@ def checkQuestion(number, code, vars):
         elif not outputMatches("Hello"):
             return "Did you print Hello?"
     elif(number == 14):
-        if isinstance(vars.get('sayHello'), bool) and not vars.get('sayHello') and "if sayHello:".strip() in code and outputMatches(""):
+        if isinstance(vars.get('sayHello'), bool) and not vars.get('sayHello') and "if sayHello:".strip() in code and outputEmpty():
             return True
         elif not isinstance(vars.get('sayHello'), bool):
             return "Did you create sayHello comparison that is set to False?"
@@ -134,8 +140,8 @@ def checkQuestion(number, code, vars):
             return "Did you create variable sayHello?"
         elif "if sayHello:".strip() not in code:
             return "Did you create an if statement checking sayHello?"
-        elif not outputMatches(""):
-            return "Did you print Hello?"
+        elif not outputEmpty:
+            return "Did you not print Hello?"+outputEmpty()
     elif(number == 15):
         if isinstance(vars.get('sayHello'), bool) and not vars.get('sayHello') and "if sayHello:".strip() in code and "else:".strip() in code and outputMatches("Goodbye"):
             return True
@@ -150,7 +156,7 @@ def checkQuestion(number, code, vars):
         elif not outputMatches("Goodbye"):
             return "Did you print 'Goodbye'?"
     elif(number == 16):
-        if isinstance(vars.get('sayHello'), bool) and not vars.get('sayHello') and isinstance(vars.get('askQuestion'), bool) and not vars.get('askQuestion') and "if sayHello:".strip() in code and "elif askQuestion:".strip() in code and "else:".strip() in code and outputMatches("How are you?"):
+        if isinstance(vars.get('sayHello'), bool) and not vars.get('sayHello') and isinstance(vars.get('askQuestion'), bool) and  vars.get('askQuestion') and "if sayHello:".strip() in code and "elif askQuestion:".strip() in code and "else:".strip() in code and outputMatches("How are you?"):
             return True
         elif not isinstance(vars.get('sayHello'), bool):
             return "Did you create sayHello comparison that is set to False?"
@@ -158,7 +164,7 @@ def checkQuestion(number, code, vars):
             return "Did you create variable sayHello?"
         elif not isinstance(vars.get('askQuestion'), bool):
             return "Did you create askQuestion comparison that is set to False?"
-        elif vars.get('askQuestion'):
+        elif not vars.get('askQuestion'):
             return "Did you create variable askQuestion?"
         elif "if sayHello:".strip() not in code:
             return "Did you create an if statement checking sayHello?"
@@ -169,13 +175,13 @@ def checkQuestion(number, code, vars):
         elif not outputMatches("How are you?"):
             return "Did you print 'How are you?'?"
     elif(number == 17):
-        if isinstance(vars.get('x'), bool) and not vars.get('x') and isinstance(vars.get('y'), bool) and not vars.get('y') and isinstance(vars.get('z'), bool) and vars.get('z') and outputMatches("TrueFalseTrue"):
+        if isinstance(vars.get('x'), bool) and vars.get('x') and isinstance(vars.get('y'), bool) and not vars.get('y') and isinstance(vars.get('z'), bool) and vars.get('z') and outputMatches("True") and outputMatches("False") and outputMatches("True"):
             return True
         elif not isinstance(vars.get('x'), bool) or not isinstance(vars.get('y'), bool) or not isinstance(vars.get('z'), bool):
             return "Did you create x,y,z comparisons?"
-        elif vars.get('x') or vars.get('y') or not vars.get('z'):
+        elif not vars.get('x') or vars.get('y') or not vars.get('z'):
             return "Did you create x,y,z variables?"
-        elif not outputMatches("TrueFalseTrue"):
+        elif not outputMatches("True") and not outputMatches("False") and not outputMatches("True"):
             return "Did you print x,y,z?"
     elif(number == 18):
         if isinstance(vars.get('x'), bool) and vars.get('x') and isinstance(vars.get('z'), bool) and vars.get('z') and "if x and z:".strip() in code and "if not z:".strip() in code and outputMatches("a"):
@@ -195,21 +201,39 @@ def checkQuestion(number, code, vars):
             return True
         elif vars.get('q') != 5:
             return "Did you create a variable q which is set to 5?"
-        elif  "if q > 3:".strip() not in code:
-            return "Did you create an if statement checking that q > 3?"
+        elif "if q > 3:".strip() not in code:
+            return "Did you create an if statement checking that q > 3?" + code
         elif not outputMatches("abc"):
             return "Did you print 'abc'?"
     elif(number == 20):
         if "input()".strip() in code:
             return True
         else:
-            return "Does your code equal <pre>input()</pre>?"
+            return "Does your code equal input?"
     elif(number == 21):
-        if vars.get('x') == input() and outputMatches("x"):
+        if vars.get('x') == input():
+            return True
+        else:
+            return "Have you created variable x and x is equal to input?"
+    elif(number == 22):
+        if "x = \"200\"".strip() in code and vars.get('x') == 200 and "print(x*2)".strip() in code and outputMatches(str(vars.get('x')*2)):
+            return True
+        elif "x = \"200\"".strip() not in code:
+            return "Did you set x to equal the string of \"200\"?"
+        elif vars.get('x') != 200:
+            return "Did you set x to equal 200 as an int?"
+        elif "print(x*2)".strip() not in code:
+            return "Did you include a print statement of x*2?"
+        elif not outputMatches(str(vars.get('x')*2)):
+            return "Did you print x*2?"
+    elif(number == 23):
+        if vars.get('x') == input() and outputMatches("You are "+vars.get('x')+" years old"):
             return True
         elif vars.get('x') != input():
-            return "Have you created variable x and x is equal to <pre>input()</pre>?"
-        elif not outputMatches("x"):
-            return "Did you print 'x'?"
+            return "Did you set x to input()?"
+        elif not outputMatches("You are "+vars.get('x')+" years old"):
+            return "Did you print x in a concatenated string?"
+    
+    
 
 
